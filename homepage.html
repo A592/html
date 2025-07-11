@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Management</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --success-color: #27ae60;
+      --background-color: #f8f9fa;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: var(--background-color);
+      color: var(--primary-color);
+    }
+
+    .container {
+      max-width: 1200px;
+      padding: 2rem 1rem;
+    }
+
+    .page-header {
+      background-color: var(--primary-color);
+      color: white;
+      padding: 2rem 0;
+      margin-bottom: 2rem;
+      border-radius: 0 0 1rem 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .card {
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+
+    .card-header {
+      background-color: white;
+      border-bottom: 2px solid var(--background-color);
+      padding: 1.5rem;
+    }
+
+    .table-container {
+      max-height: 500px;
+      overflow-y: auto;
+      border-radius: 0.5rem;
+    }
+
+    .table {
+      margin-bottom: 0;
+    }
+
+    .table thead th {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 1rem;
+      position: sticky;
+      top: 0;
+    }
+
+    .table tbody td {
+      padding: 1rem;
+      vertical-align: middle;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      border-color: var(--success-color);
+    }
+
+    .form-control {
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+
+    .spinner-border {
+      width: 1.5rem;
+      height: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .page-header {
+        padding: 1.5rem 0;
+      }
+
+      .table-responsive {
+        margin: 0 -1rem;
+      }
+
+      .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-header">
+    <div class="container">
+      <h1 class="text-center mb-0">
+        <i class="fas fa-users me-2"></i>User Management
+      </h1>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Alert Messages -->
+    <div id="alertContainer" class="mb-4"></div>
+
+    <!-- Load Users Section -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h2 class="h4 mb-0">User List</h2>
+        <div class="d-flex align-items-center">
+          <div id="loadingSpinner" class="spinner-border text-primary me-2" role="status" style="display: none;">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <button id="loadBtn" class="btn btn-primary" onclick="loadUsers()">
+            <i class="fas fa-sync-alt me-2"></i>Load Users
+          </button>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive table-container">
+          <table class="table table-hover" id="userTable" style="display: none;">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Age</th>
+                <th>Occupation</th>
+              </tr>
+            </thead>
+            <tbody id="userTableBody">
+              <!-- Data will be inserted here -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add New User Form -->
+    <div class="card">
+      <div class="card-header">
+        <h2 class="h4 mb-0">
+          <i class="fas fa-user-plus me-2"></i>Add New User
+        </h2>
+      </div>
+      <div class="card-body">
+        <form id="userForm" onsubmit="submitUser(event)">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="firstName" class="form-label">First Name</label>
+              <input type="text" class="form-control" id="firstName" placeholder="Enter first name" required>
+            </div>
+            <div class="col-md-6">
+              <label for="lastName" class="form-label">Last Name</label>
+              <input type="text" class="form-control" id="lastName" placeholder="Enter last name" required>
+            </div>
+            <div class="col-md-6">
+              <label for="age" class="form-label">Age</label>
+              <input type="number" class="form-control" id="age" placeholder="Enter age" required min="0">
+            </div>
+            <div class="col-md-6">
+              <label for="occupation" class="form-label">Occupation</label>
+              <input type="text" class="form-control" id="occupation" placeholder="Enter occupation" required>
+            </div>
+            <div class="col-12">
+              <button type="submit" id="submitBtn" class="btn btn-success">
+                <i class="fas fa-save me-2"></i>Submit User
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function showAlert(message, type) {
+      const alertContainer = document.getElementById('alertContainer');
+      alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+          ${message}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      `;
+    }
+
+    function submitUser(event) {
+      event.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+
+      const user = {
+        firstName: document.getElementById('firstName').value.trim(),
+        lastName: document.getElementById('lastName').value.trim(),
+        age: parseInt(document.getElementById('age').value),
+        occupation: document.getElementById('occupation').value.trim()
+      };
+
+      fetch('http://localhost:8080/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(user)
+      })
+      .then(response => {
+        if (response.status === 204) {
+          showAlert('User saved successfully!', 'success');
+          document.getElementById('userForm').reset();
+          loadUsers();
+        } else if (response.status === 400) {
+          // Handle Bad Request (400) response
+          return response.text().then(errorMessage => {
+            showAlert(errorMessage || 'Invalid input data. Please check your input.', 'danger');
+          });
+        } else {
+          showAlert('Failed to save user.', 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('POST error:', error);
+        showAlert('Error occurred while saving user.', 'danger');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+      });
+    }
+
+    function loadUsers() {
+      const spinner = document.getElementById('loadingSpinner');
+      const table = document.getElementById('userTable');
+      const tbody = document.getElementById('userTableBody');
+      const loadBtn = document.getElementById('loadBtn');
+
+      // Show spinner and disable button
+      spinner.style.display = 'inline-block';
+      loadBtn.disabled = true;
+
+      fetch('http://localhost:8080/users')
+        .then(response => response.json())
+        .then(data => {
+          tbody.innerHTML = '';
+          data.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.id}</td>
+              <td>${user.firstName}</td>
+              <td>${user.lastName}</td>
+              <td>${user.age}</td>
+              <td>${user.occupation}</td>
+            `;
+            tbody.appendChild(row);
+          });
+          table.style.display = 'table';
+        })
+        .catch(error => {
+          console.error('Fetch error:', error);
+          showAlert('Error loading users.', 'danger');
+        })
+        .finally(() => {
+          // Hide spinner and enable button
+          spinner.style.display = 'none';
+          loadBtn.disabled = false;
+        });
+    }
+  </script>
+</body>
+</html>
